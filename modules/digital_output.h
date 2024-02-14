@@ -43,14 +43,15 @@ public:
     if ((*payload) == "ON" && this->state == ST::ST_L) {
       digitalWrite(this->pin, HIGH);
       this->state = ST::ST_H;
+      mqttClient.publish(this->topic.c_str(), this->state == ST::ST_H ? "ON" : "OFF");
     }
     else if ((*payload) == "OFF" && this->state == ST::ST_H) {
       digitalWrite(this->pin, LOW);
       this->state = ST::ST_L;
+      mqttClient.publish(this->topic.c_str(), this->state == ST::ST_H ? "ON" : "OFF");
     }
     else if ((*payload) == "STATE") {
-      String state_topic = this->topic + "/state";
-      mqttClient.publish(state_topic.c_str(), this->state == ST::ST_H ? "ON" : "OFF");
+      mqttClient.publish(this->topic.c_str(), this->state == ST::ST_H ? "ON" : "OFF");
     }
   }
 

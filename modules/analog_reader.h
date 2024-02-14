@@ -81,7 +81,7 @@ public:
   BaseType_t start() {
     return xTaskCreate(
       &AnalogReader::task,
-      this->name.c_str(),
+      this->topic.c_str(),
       2048,
       this,
       (UBaseType_t)this->task_priority,

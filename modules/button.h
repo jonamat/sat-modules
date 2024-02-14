@@ -76,7 +76,7 @@ public:
 
     return xTaskCreate(
       &Button::task,
-      this->name.c_str(),
+      this->topic.c_str(),
       2048,
       this,
       (UBaseType_t)this->task_priority,

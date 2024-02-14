@@ -5,6 +5,13 @@
 
 #include "config.h"
 
+/* Task priority */
+enum class TSK_PRT {
+  P_L = 1,
+  P_M = 2,
+  P_H = 3,
+};
+
 class Module
 {
 public:
@@ -12,7 +19,6 @@ public:
   virtual BaseType_t start() = 0;
   virtual void onCommand(String* payload) = 0;
 
-  String name;
   String topic;
   TSK_PRT task_priority;
 };
@@ -27,11 +33,4 @@ enum class ST {
 enum class MODE {
   PULL_UP = INPUT_PULLUP,
   PULL_DOWN = INPUT_PULLDOWN,
-};
-
-/* Task priority */
-enum class TSK_PRT {
-  P_L = 1,
-  P_M = 2,
-  P_H = 3,
 };

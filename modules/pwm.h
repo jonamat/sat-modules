@@ -65,6 +65,16 @@ public:
       ledcWrite(this->channel, value);
       mqttClient.publish(this->topic.c_str(), String(this->state).c_str());
     }
+    else if ((*payload) == "ON") {
+      this->state = 255;
+      ledcWrite(this->channel, this->state);
+      mqttClient.publish(this->topic.c_str(), String(this->state).c_str());
+    }
+    else if ((*payload) == "OFF") {
+      this->state = 0;
+      ledcWrite(this->channel, this->state);
+      mqttClient.publish(this->topic.c_str(), String(this->state).c_str());
+    }
     else if ((*payload) == "STATE") {
       mqttClient.publish(this->topic.c_str(), String(this->state).c_str());
     }

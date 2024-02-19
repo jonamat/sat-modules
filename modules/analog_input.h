@@ -5,7 +5,7 @@
 extern PubSubClient mqttClient;
 
 /**
- * @brief AnalogReader
+ * @brief AnalogInput
  * @details Read the binary state of a pin and send the new state on change.
  *
  * @param topic Root topic of the device.
@@ -23,7 +23,7 @@ extern PubSubClient mqttClient;
  * - Add sampling
  *
  */
-class AnalogReader : public Module
+class AnalogInput : public Module
 {
 private:
   int pin;
@@ -32,7 +32,7 @@ private:
   int state;
 
 public:
-  AnalogReader(
+  AnalogInput(
     String topic,
     int pin,
     uint delay = 1000,
@@ -47,7 +47,7 @@ public:
   }
 
   static void task(void* param) {
-    AnalogReader* pThis = (AnalogReader*)param;
+    AnalogInput* pThis = (AnalogInput*)param;
 
     while (true) {
       int currentState = analogRead(pThis->pin);
@@ -80,7 +80,7 @@ public:
 
   BaseType_t start() {
     return xTaskCreate(
-      &AnalogReader::task,
+      &AnalogInput::task,
       this->topic.c_str(),
       2048,
       this,

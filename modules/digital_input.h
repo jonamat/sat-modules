@@ -23,25 +23,28 @@ private:
   int pin;
   ST state = ST::UNKNOWN;
   uint delay;
+  bool invert_logic = false;
 
 public:
   DigitalInput(
     String topic,
     int pin,
     uint delay = 10,
-    TSK_PRT task_priority = TSK_PRT::P_M
+    TSK_PRT task_priority = TSK_PRT::P_M,
+    bool invert_logic = false
   ) {
     this->topic = topic;
     this->pin = pin;
     this->delay = delay;
     this->task_priority = task_priority;
+    this->invert_logic = invert_logic;
   }
 
   void setup() {
     pinMode(this->pin, INPUT_PULLDOWN);
     ST currentState = (ST)digitalRead(this->pin);
     this->state = currentState;
-    mqttClient.publish(this->topic.c_str(), currentState == ST::ST_H ? "ON" : "OFF");
+    mqttClient.publish(this->topic.c_str(), stateToPayload(currentState).c_str());
   }
 
   static void task(void* param) {
@@ -52,7 +55,7 @@ public:
 
       if (currentState != pThis->state) {
         pThis->state = currentState;
-        mqttClient.publish(pThis->topic.c_str(), currentState == ST::ST_H ? "ON" : "OFF");
+        mqttClient.publish(pThis->topic.c_str(), pThis->stateToPayload(currentState).c_str());
       }
 
       vTaskDelay(pThis->delay / portTICK_PERIOD_MS);
@@ -62,7 +65,15 @@ public:
   void onCommand(String* payload) {
     if ((*payload) == "STATE") {
       ST currentState = (ST)digitalRead(this->pin);
-      mqttClient.publish(this->topic.c_str(), currentState == ST::ST_H ? "ON" : "OFF");
+      mqttClient.publish(this->topic.c_str(), stateToPayload(currentState).c_str());
+    }
+  }
+
+  String stateToPayload(ST state) {
+    if (this->invert_logic) {
+      return state == ST::ST_H ? "OFF" : "ON";
+    } else {
+      return state == ST::ST_H ? "ON" : "OFF";
     }
   }
 

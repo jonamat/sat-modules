@@ -11,17 +11,14 @@ extern PubSubClient mqttClient;
  *
  * @param topic Root topic of the device.
  * @param pin Pin to use.
- * @param delay Delay between each state check. Default is 1000ms.
- * @param tolerance Tolerance to trigger a state change. Default is 10.
+ * @param delay Delay between each state check. Default is 100ms.
+ * @param tolerance Tolerance to trigger a state change. Default is 50.
  * @param task_priority Priority of the task. Default is P_M (medium).
+ * @param samples Number of samples to average. Default is 10.
+ * @param delay_between_samples Delay between each sample. Default is 10ms.
  *
  * @note Available commands:
  * "STATE" publish the current state of the device
- *
- * TODO:
- * - Add resolution
- * - Add cycles
- * - Add sampling
  *
  */
 class AnalogInput : public Module
@@ -31,33 +28,38 @@ private:
   uint delay;
   int tolerance;
   int state;
+  int samples;
+  int delay_between_samples;
 
 public:
   AnalogInput(
     String topic,
     int pin,
-    uint delay = 1000,
-    int tolerance = 10,
-    TSK_PRT task_priority = TSK_PRT::P_M
+    uint delay = 100,
+    int tolerance = 50,
+    TSK_PRT task_priority = TSK_PRT::P_M,
+    int samples = 10,
+    int delay_between_samples = 10
   ) {
-    this->topic = topic;
     this->pin = pin;
     this->delay = delay;
     this->tolerance = tolerance;
     this->task_priority = task_priority;
+    this->samples = samples;
+    this->delay_between_samples = delay_between_samples;
   }
 
   static void task(void* param) {
     AnalogInput* pThis = (AnalogInput*)param;
 
     while (true) {
-      int samples = 0;
-      for (int i = 0; i < SAMPLING_RATE; i++) {
-        samples += analogRead(pThis->pin);
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+      int sampleSum = 0;
+      for (int i = 0; i < pThis->samples; i++) {
+        sampleSum += analogRead(pThis->pin);
+        vTaskDelay(pThis->delay_between_samples / portTICK_PERIOD_MS);
       }
 
-      int currentState = int(samples / SAMPLING_RATE);
+      int currentState = int(sampleSum / pThis->samples);
 
       if (currentState > pThis->state + pThis->tolerance || currentState < pThis->state - pThis->tolerance) {
         pThis->state = currentState;

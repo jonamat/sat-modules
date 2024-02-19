@@ -1,6 +1,7 @@
 #include <PubSubClient.h>
-
 #include "../module.h"
+
+#define SAMPLING_RATE 10
 
 extern PubSubClient mqttClient;
 
@@ -15,7 +16,7 @@ extern PubSubClient mqttClient;
  * @param task_priority Priority of the task. Default is P_M (medium).
  *
  * @note Available commands:
- * "STATE" publish the current state of the device on /state
+ * "STATE" publish the current state of the device
  *
  * TODO:
  * - Add resolution
@@ -50,15 +51,20 @@ public:
     AnalogInput* pThis = (AnalogInput*)param;
 
     while (true) {
-      int currentState = analogRead(pThis->pin);
+      int samples = 0;
+      for (int i = 0; i < SAMPLING_RATE; i++) {
+        samples += analogRead(pThis->pin);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+      }
+
+      int currentState = int(samples / SAMPLING_RATE);
 
       if (currentState > pThis->state + pThis->tolerance || currentState < pThis->state - pThis->tolerance) {
         pThis->state = currentState;
 
-        String state_topic = pThis->topic;
         char c_state[4];
         sprintf(c_state, "%d", pThis->state);
-        mqttClient.publish(state_topic.c_str(), c_state);
+        mqttClient.publish(pThis->topic.c_str(), c_state);
       }
 
       vTaskDelay(pThis->delay / portTICK_PERIOD_MS);
@@ -82,7 +88,7 @@ public:
     return xTaskCreate(
       &AnalogInput::task,
       this->topic.c_str(),
-      2048,
+      4096,
       this,
       (UBaseType_t)this->task_priority,
       NULL);

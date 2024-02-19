@@ -12,7 +12,7 @@ extern PubSubClient mqttClient;
  * @param pin Pin to use.
  *
  * @note Available commands:
- * "STATE" publish the current state of the device on /state
+ * "STATE" publish the current state of the device
  * "ON" set the state to 255
  * "OFF" set the state to 0
  * "SET xx" set the state to xx (0 to 255)

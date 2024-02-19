@@ -16,7 +16,7 @@ extern PubSubClient mqttClient;
  * @param duty_res Duty resolution. Default is 8 bit.
  *
  * @note Available commands:
- * "STATE" publish the current state of the device on /state
+ * "STATE" publish the current state of the device
  * "SET xx" set the state to xx (0-255)
  *
  */
